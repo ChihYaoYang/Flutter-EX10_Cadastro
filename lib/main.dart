@@ -18,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("App"),
+        title: Text("Contato"),
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
       ),
@@ -28,8 +28,10 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
-              context, MaterialPageRoute(builder: (context) => CadastroPage()
-          ));
+            //intent
+            context,
+            MaterialPageRoute(builder: (context) => CadastroPage()),
+          );
         },
         child: Icon(Icons.add),
         backgroundColor: Colors.green,
