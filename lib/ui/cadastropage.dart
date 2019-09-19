@@ -1,14 +1,67 @@
 import 'package:flutter/material.dart';
 import '../helper/person_helper.dart';
+import 'package:validators/validators.dart';
 
 class CadastroPage extends StatefulWidget {
+  //constructor
+  final Person person;
+
+  CadastroPage({this.person});
+
   @override
   _CadastroPageState createState() => _CadastroPageState();
 }
 
 class _CadastroPageState extends State<CadastroPage> {
+  //Declara variável
+  GlobalKey<FormState> _formkey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _telefoneController = TextEditingController();
+  bool condition = false;
+  Person _editedPerson;
+
+  @override
+  //初始化狀態時
+  void initState() {
+    super.initState();
+    //Quando person for null => começa uma nova cadastro
+    if (widget.person == null) {
+      _editedPerson = Person();
+    } else {
+      //Quando tem valor no person => fazer update da lista
+      _editedPerson = Person.fromMap(widget.person.toMap());
+      _nomeController.text = _editedPerson.nome;
+      _telefoneController.text = _editedPerson.telefone;
+    }
+    //Opacidade botão resert
+    _nomeController.addListener(() {
+      btnReset();
+    });
+    _telefoneController.addListener(() {
+      btnReset();
+    });
+  }
+
+//Opacidade botão resert
+  void btnReset() {
+    setState(() {
+      if (_nomeController.text.isNotEmpty ||
+          _telefoneController.text.isNotEmpty) {
+        condition = true;
+      } else {
+        condition = false;
+      }
+    });
+  }
+
+//Resert valor do campo e fecha keyboard
+  void _resetFields() {
+    _nomeController.text = "";
+    _telefoneController.text = "";
+    setState(() {
+      FocusScope.of(context).requestFocus(new FocusNode());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,55 +69,97 @@ class _CadastroPageState extends State<CadastroPage> {
       appBar: AppBar(
         //remove o botão da APPBAR
 //          automaticallyImplyLeading: false,
-        title: Text("Cadastro"),
+        title: Text(_editedPerson.nome ?? 'Novo contato'),
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
+        actions: <Widget>[
+          Opacity(
+              //define a opacidade conforme o preenchimento dos campos.
+              opacity: this.condition ? 1.0 : 0.0,
+              child: ButtonTheme(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: RaisedButton(
+                    color: Colors.blueAccent,
+                    textColor: Colors.white,
+                    onPressed: () {
+                      //desativa o clique do botão.
+                      condition ? _resetFields() : null;
+                    },
+                    child: Icon(Icons.refresh),
+                  )))
+        ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(10.0),
-        child: Column(
-          children: <Widget>[
-            TextFormField(
-              decoration: InputDecoration(
-                prefix: Icon(Icons.account_circle),
-                labelText: "Digite o Nome",
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.cyan),
+        child: Form(
+          key: _formkey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TextFormField(
+                decoration: InputDecoration(
+                  prefix: Icon(Icons.person),
+                  labelText: "Digite o Nome",
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.cyan),
+                  ),
                 ),
+                controller: _nomeController,
+                validator: (value) {
+                  //Valida o campo se for vazio return text
+                  if (value.isEmpty) {
+                    return "Preencher este campo  !";
+                  } else {
+                    //else passa valor para _editedPerson  => _editedPerson.nome nome do campo
+                    setState(() {
+                      _editedPerson.nome = value;
+                    });
+                  }
+                },
               ),
-              controller: _nomeController,
-            ),
-            TextFormField(
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                prefix: Icon(Icons.email),
-                labelText: "Digite o E-mail",
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.cyan),
+              TextFormField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  prefix: Icon(Icons.phone),
+                  labelText: "Digite o Telefone",
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.cyan),
+                  ),
                 ),
+                controller: _telefoneController,
+                validator: (value) {
+                  //Valida o campo se for vazio return text
+                  if (value.isEmpty) {
+                    return "Preencher este campo  !";
+                  } else {
+                    //else passa valor para _editedPerson  => _editedPerson.telefone nome do campo
+                    setState(() {
+                      _editedPerson.telefone = value;
+                    });
+                  }
+                },
               ),
-              controller: _emailController,
-            ),
-//            RaisedButton(
-//              onPressed: () {
-//                Navigator.pop(context);
-//              },
-//              color: Colors.blueAccent,
-//              child: Column(
-//                mainAxisAlignment: MainAxisAlignment.center,
-//                crossAxisAlignment: CrossAxisAlignment.stretch,
-//                children: <Widget>[
-//                  Icon(Icons.save,
-//                  color: Colors.white,),
-//                ],
-//              ),
-//            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        //Botão flutuante
         onPressed: () {
-          Navigator.pop(context);
+          //Valida campo
+          if (_formkey.currentState.validate()) {
+            //Valida campo se é número
+            if (isNumeric(_telefoneController.text)) {
+              //Deu certo fecha keyboard  e _editedPerson passa para página Home (ListView)
+//              if (_editedPerson.nome != null && _editedPerson.nome.isNotEmpty) {
+              FocusScope.of(context).requestFocus(new FocusNode());
+              Navigator.pop(context, _editedPerson);
+            } else {
+              //else exibir mensagem
+              _showDialog(
+                  'Aviso', 'O campo telefone, Preencher somente números !');
+            }
+          }
         },
         child: Icon(Icons.save),
         backgroundColor: Colors.cyan,
@@ -72,6 +167,7 @@ class _CadastroPageState extends State<CadastroPage> {
     );
   }
 
+  //Alert Dialog
   void _showDialog(String title, String message) {
     showDialog(
       context: context,

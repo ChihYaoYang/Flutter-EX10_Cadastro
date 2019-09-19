@@ -1,7 +1,8 @@
-import 'package:cadastro_app/ui/Person.dart';
+import 'package:cadastro_app/ui/People.dart';
 import 'package:cadastro_app/ui/cadastropage.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cadastro_app/helper/person_helper.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -16,6 +17,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  //Chama Helper /Cria ListView
+  PersonHelper helper = PersonHelper();
+  List<Person> persons = List();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,23 +31,18 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         //Criar ListView
-        child: ListView(
-          children: <Widget>[
-            _itemList(context, 1, 'AAA', '(01) 123456789'),
-            _itemList(context, 2, 'BBB', '(02) 987654321'),
-            _itemList(context, 3, 'CCC', '(03) 147852369'),
-            _itemList(context, 4, 'DDD', '(04) 963852741'),
-            _itemList(context, 5, 'EEE', '(05) 951753852'),
-          ],
-        ),
+        child: ListView.builder(
+            // Criar Lista
+            padding: EdgeInsets.all(10.0),
+            //Count quanto item tem no DB
+            itemCount: persons.length,
+            itemBuilder: (context, index) {
+              return _itemList(context, index); // return item do DB
+            }),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            //intent
-            context,
-            MaterialPageRoute(builder: (context) => CadastroPage()),
-          );
+          _showCadastroPage();
         },
         child: Icon(Icons.add),
         backgroundColor: Colors.green,
@@ -50,22 +50,61 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _itemList(BuildContext context, int id, String nome, String telefone) {
+  //初始化狀態時
+  @override
+  void initState() {
+    //Fazer getAll do Item
+    super.initState();
+    _getAllPersons();
+  }
+
+  //Fazer getAll do Item
+  void _getAllPersons() {
+    helper.getAllPersons().then((list) {
+      setState(() {
+        persons = list;
+      });
+    });
+  }
+
+  //Ir para Cadastro (INSERT)
+  //Passa Class person para cadastropage.dart
+  void _showCadastroPage({Person person}) async {
+    final recPerson = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CadastroPage(
+                  person: person,
+                )));
+    //Valida person
+    if (recPerson != null) {
+      //Se for diferente que NULL => UPDATE
+      if (person != null) {
+        await helper.updatePerson(recPerson);
+      } else {
+        //Se for null person vazio => INSERT começa nova cadastro
+        await helper.savePerson(recPerson);
+      }
+      _getAllPersons();
+    }
+  }
+
+  //ListView.builder Montar estrutura da listcard
+  Widget _itemList(BuildContext context, int index) {
     return GestureDetector(
       child: Card(
         child: ListTile(
-          title: Text(nome),
-          subtitle: Text(telefone),
+          title: Text(persons[index].nome),
+          subtitle: Text(persons[index].telefone),
           onTap: () {
-            _showOptions(context, id, nome, telefone);
+            _showOptions(context, index);
           },
         ),
       ),
     );
   }
 
-  void _showOptions(
-      BuildContext context, int id, String nome, String telefone) {
+  void _showOptions(BuildContext context, int index) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -102,8 +141,10 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    Person(id, nome, telefone)),
+                                builder: (context) => People(
+                                    persons[index].id,
+                                    persons[index].nome,
+                                    persons[index].telefone)),
                           );
                         }),
                   ),
@@ -127,8 +168,61 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                       onPressed: () {
-                        launch("tel:$telefone");
+                        launch("tel:${persons[index].telefone}");
                         Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: FlatButton(
+                      child: Row(
+                        children: <Widget>[
+                          Icon(Icons.edit, color: Colors.cyan),
+                          Padding(
+                              padding: EdgeInsets.only(left: 10),
+                              child: Column(
+                                children: <Widget>[
+                                  Text(
+                                    'Editar',
+                                    style: TextStyle(
+                                        color: Colors.cyan, fontSize: 20.0),
+                                  ),
+                                ],
+                              ))
+                        ],
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showCadastroPage(person: persons[index]);
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: FlatButton(
+                      child: Row(
+                        children: <Widget>[
+                          Icon(Icons.delete, color: Colors.cyan),
+                          Padding(
+                              padding: EdgeInsets.only(left: 10),
+                              child: Column(
+                                children: <Widget>[
+                                  Text(
+                                    'Deletar',
+                                    style: TextStyle(
+                                        color: Colors.cyan, fontSize: 20.0),
+                                  ),
+                                ],
+                              ))
+                        ],
+                      ),
+                      onPressed: () {
+                        helper.deletePerson(persons[index].id);
+                        setState(() {
+                          persons.removeAt(index);
+                          Navigator.pop(context);
+                        });
                       },
                     ),
                   ),

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 
-class Person extends StatefulWidget {
+class People extends StatefulWidget {
   final int id;
   final String nome;
   final String telefone;
 
   //todos os parâmetros são obrigatorios no construtor da class:
-  Person(this.id, this.nome, this.telefone);
+  People(this.id, this.nome, this.telefone);
 
   //Parâmetros opcionais
 //  Person({this.id, this.nome, @required this.telefone});
 
   @override
-  _PersonState createState() => _PersonState();
+  _PeopleState createState() => _PeopleState();
 }
 
-class _PersonState extends State<Person> {
+class _PeopleState extends State<People> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

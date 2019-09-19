@@ -1,6 +1,6 @@
 # cadastro_app
 
-A new Flutter application.
+Flutter DB
 
 ## Getting Started
 

@@ -25,6 +25,7 @@ dependencies:
   cupertino_icons: ^0.1.2
   sqflite: any
   url_launcher: 3.0.2
+  validators: ^2.0.0
 
 dev_dependencies:
   flutter_test:
