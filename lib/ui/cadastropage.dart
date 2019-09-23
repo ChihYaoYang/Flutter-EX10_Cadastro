@@ -151,7 +151,6 @@ class _CadastroPageState extends State<CadastroPage> {
             //Valida campo se é número
             if (isNumeric(_telefoneController.text)) {
               //Deu certo fecha keyboard  e _editedPerson passa para página Home (ListView)
-//              if (_editedPerson.nome != null && _editedPerson.nome.isNotEmpty) {
               FocusScope.of(context).requestFocus(new FocusNode());
               Navigator.pop(context, _editedPerson);
             } else {
