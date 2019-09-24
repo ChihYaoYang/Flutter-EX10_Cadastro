@@ -26,7 +26,6 @@ dependencies:
   sqflite: any
   url_launcher: 3.0.2
   validators: ^2.0.0
-  passwordfield: ^0.0.4
 
 dev_dependencies:
   flutter_test:

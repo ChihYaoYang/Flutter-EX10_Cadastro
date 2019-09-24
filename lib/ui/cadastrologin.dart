@@ -18,7 +18,10 @@ class _CadastroLoginState extends State<CadastroLogin> {
   final _nomeController = TextEditingController();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
+
+  //Declara booleano
   bool condition = false;
+  bool passwordVisible;
   Login _editedLogin;
 
   @override
@@ -37,6 +40,7 @@ class _CadastroLoginState extends State<CadastroLogin> {
     _senhaController.addListener(() {
       btnReset();
     });
+    passwordVisible = true;
   }
 
 //Opacidade botão resert
@@ -137,23 +141,29 @@ class _CadastroLoginState extends State<CadastroLogin> {
                 },
               ),
               TextFormField(
+                obscureText: passwordVisible,
                 decoration: InputDecoration(
                   prefix: Icon(Icons.vpn_key),
                   labelText: "Digite a Senha",
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.cyan),
                   ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      passwordVisible ? Icons.visibility_off : Icons.visibility,
+//                      color: Theme.of(context).primaryColorDark,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        passwordVisible = !passwordVisible;
+                      });
+                    },
+                  ),
                 ),
                 controller: _senhaController,
                 validator: (value) {
-                  //Valida o campo se for vazio return text
                   if (value.isEmpty) {
                     return "Preencher este campo  !";
-                  } else {
-                    //else passa valor para editedLogin  => editedLogin.nome nome do campo
-                    setState(() {
-                      _editedLogin.senha = value;
-                    });
                   }
                 },
               ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cadastro_app/ui/cadastrologin.dart';
 import 'package:cadastro_app/ui/home.dart';
 import 'package:cadastro_app/helper/login_helper.dart';
-import 'package:passwordfield/passwordfield.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -13,9 +12,34 @@ class _LoginPageState extends State<LoginPage> {
   GlobalKey<FormState> _formkey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
-  List<Login> logins = List();
 
+  //Declara booleano
+  bool passwordVisible;
 
+  LoginHelper helper = LoginHelper();
+
+  //初始化狀態時 passwordVisible = true 隱藏字體
+  @override
+  void initState() {
+    passwordVisible = true;
+  }
+
+  //Passa valor e valida o campo email e senha
+  void _loginvalidation({Login login}) async {
+//    final recLogin = await Navigator.push(
+//        context,
+//        MaterialPageRoute(
+//            builder: (context) => HomePage(
+//
+//            )));
+//    //Valida person
+//    if (recLogin != null) {
+//      //Se for diferente que NULL => UPDATE
+//      if (login != null) {
+//        await helper.getLogin(recLogin);
+//      }
+//    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,22 +84,33 @@ class _LoginPageState extends State<LoginPage> {
                   }
                 },
               ),
-              PasswordField(
-//                decoration: InputDecoration(
-//                  prefix: Icon(Icons.vpn_key),
-//                  labelText: "Digite a Senha",
-//                  enabledBorder: UnderlineInputBorder(
-//                    borderSide: BorderSide(color: Colors.cyan),
-//                  ),
-//                ),
-//                controller: _senhaController,
-//                validator: (value) {
-//                  if (value.isEmpty) {
-//                    return "Preencher este campo  !";
-//                  }
-//                },
-//
+              TextFormField(
+                obscureText: passwordVisible,
+                decoration: InputDecoration(
+                  prefix: Icon(Icons.vpn_key),
+                  labelText: "Digite a Senha",
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.cyan),
                   ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      passwordVisible ? Icons.visibility_off : Icons.visibility,
+//                      color: Theme.of(context).primaryColorDark,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        passwordVisible = !passwordVisible;
+                      });
+                    },
+                  ),
+                ),
+                controller: _senhaController,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return "Preencher este campo  !";
+                  }
+                },
+              ),
               Padding(
                 padding: EdgeInsets.all(10.0),
                 child: RaisedButton(
@@ -86,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   onPressed: () {
                     if (_formkey.currentState.validate()) {
-//                      _login();
+                      _loginvalidation();
                     }
                   },
                 ),
