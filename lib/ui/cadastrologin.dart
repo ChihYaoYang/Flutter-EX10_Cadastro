@@ -133,7 +133,7 @@ class _CadastroLoginState extends State<CadastroLogin> {
                   if (value.isEmpty) {
                     return "Preencher este campo  !";
                   } else {
-                    //else passa valor para editedLogin  => editedLogin.nome nome do campo
+                    //else passa valor para editedLogin  => editedLogin.email nome do campo
                     setState(() {
                       _editedLogin.email = value;
                     });
@@ -151,7 +151,6 @@ class _CadastroLoginState extends State<CadastroLogin> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       passwordVisible ? Icons.visibility_off : Icons.visibility,
-//                      color: Theme.of(context).primaryColorDark,
                     ),
                     onPressed: () {
                       setState(() {
@@ -176,11 +175,11 @@ class _CadastroLoginState extends State<CadastroLogin> {
         onPressed: () {
           //Valida campo
           if (_formkey.currentState.validate()) {
-            //Valida campo se é número
+            //Valida campo se é email
             if (isEmail(_emailController.text)) {
               //Deu certo fecha keyboard  e _editedPerson passa para página Home (ListView)
               FocusScope.of(context).requestFocus(new FocusNode());
-              Navigator.pop(context);
+              Navigator.pop(context, _editedLogin);
             } else {
               //else exibir mensagem
               _showDialog(
