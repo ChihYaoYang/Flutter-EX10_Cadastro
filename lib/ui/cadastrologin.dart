@@ -1,43 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:cadastro_app/helper/person_helper.dart';
 import 'package:validators/validators.dart';
+import 'package:cadastro_app/helper/login_helper.dart';
 
-class CadastroPage extends StatefulWidget {
+class CadastroLogin extends StatefulWidget {
   //constructor
-  final Person person;
+  Login login;
 
-  CadastroPage({this.person});
+  CadastroLogin({this.login});
 
   @override
-  _CadastroPageState createState() => _CadastroPageState();
+  _CadastroLoginState createState() => _CadastroLoginState();
 }
 
-class _CadastroPageState extends State<CadastroPage> {
+class _CadastroLoginState extends State<CadastroLogin> {
   //Declara variável
   GlobalKey<FormState> _formkey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
-  final _telefoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _senhaController = TextEditingController();
   bool condition = false;
-  Person _editedPerson;
+  Login _editedLogin;
 
   @override
   //初始化狀態時
   void initState() {
-    super.initState();
-    //Quando person for null => começa uma nova cadastro
-    if (widget.person == null) {
-      _editedPerson = Person();
-    } else {
-      //Quando tem valor no person => fazer update da lista
-      _editedPerson = Person.fromMap(widget.person.toMap());
-      _nomeController.text = _editedPerson.nome;
-      _telefoneController.text = _editedPerson.telefone;
+    if (widget.login == null) {
+      _editedLogin = Login();
     }
-    //Opacidade botão resert
+    super.initState();
     _nomeController.addListener(() {
       btnReset();
     });
-    _telefoneController.addListener(() {
+    _emailController.addListener(() {
+      btnReset();
+    });
+    _senhaController.addListener(() {
       btnReset();
     });
   }
@@ -46,7 +43,8 @@ class _CadastroPageState extends State<CadastroPage> {
   void btnReset() {
     setState(() {
       if (_nomeController.text.isNotEmpty ||
-          _telefoneController.text.isNotEmpty) {
+          _emailController.text.isNotEmpty ||
+          _senhaController.text.isNotEmpty) {
         condition = true;
       } else {
         condition = false;
@@ -57,7 +55,8 @@ class _CadastroPageState extends State<CadastroPage> {
 //Resert valor do campo e fecha keyboard
   void _resetFields() {
     _nomeController.text = "";
-    _telefoneController.text = "";
+    _emailController.text = "";
+    _senhaController.text = "";
     setState(() {
       FocusScope.of(context).requestFocus(new FocusNode());
     });
@@ -67,10 +66,8 @@ class _CadastroPageState extends State<CadastroPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        //remove o botão da APPBAR
-//          automaticallyImplyLeading: false,
-        title: Text(_editedPerson.nome ?? 'Novo contato'),
-        backgroundColor: Colors.blueAccent,
+        title: Text('Cadastro Login'),
+        backgroundColor: Colors.cyan,
         centerTitle: true,
         actions: <Widget>[
           Opacity(
@@ -79,7 +76,7 @@ class _CadastroPageState extends State<CadastroPage> {
               child: ButtonTheme(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: RaisedButton(
-                    color: Colors.blueAccent,
+                    color: Colors.cyan,
                     textColor: Colors.white,
                     onPressed: () {
                       //desativa o clique do botão.
@@ -110,31 +107,52 @@ class _CadastroPageState extends State<CadastroPage> {
                   if (value.isEmpty) {
                     return "Preencher este campo  !";
                   } else {
-                    //else passa valor para _editedPerson  => _editedPerson.nome nome do campo
+                    //else passa valor para editedLogin  => editedLogin.nome nome do campo
                     setState(() {
-                      _editedPerson.nome = value;
+                      _editedLogin.nome = value;
                     });
                   }
                 },
               ),
               TextFormField(
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  prefix: Icon(Icons.phone),
-                  labelText: "Digite o Telefone",
+                  prefix: Icon(Icons.email),
+                  labelText: "Digite o E-mail",
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.cyan),
                   ),
                 ),
-                controller: _telefoneController,
+                controller: _emailController,
                 validator: (value) {
                   //Valida o campo se for vazio return text
                   if (value.isEmpty) {
                     return "Preencher este campo  !";
                   } else {
-                    //else passa valor para _editedPerson  => _editedPerson.telefone nome do campo
+                    //else passa valor para editedLogin  => editedLogin.nome nome do campo
                     setState(() {
-                      _editedPerson.telefone = value;
+                      _editedLogin.email = value;
+                    });
+                  }
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(
+                  prefix: Icon(Icons.vpn_key),
+                  labelText: "Digite a Senha",
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.cyan),
+                  ),
+                ),
+                controller: _senhaController,
+                validator: (value) {
+                  //Valida o campo se for vazio return text
+                  if (value.isEmpty) {
+                    return "Preencher este campo  !";
+                  } else {
+                    //else passa valor para editedLogin  => editedLogin.nome nome do campo
+                    setState(() {
+                      _editedLogin.senha = value;
                     });
                   }
                 },
@@ -149,14 +167,14 @@ class _CadastroPageState extends State<CadastroPage> {
           //Valida campo
           if (_formkey.currentState.validate()) {
             //Valida campo se é número
-            if (isNumeric(_telefoneController.text)) {
+            if (isEmail(_emailController.text)) {
               //Deu certo fecha keyboard  e _editedPerson passa para página Home (ListView)
               FocusScope.of(context).requestFocus(new FocusNode());
-              Navigator.pop(context, _editedPerson);
+              Navigator.pop(context);
             } else {
               //else exibir mensagem
               _showDialog(
-                  'Aviso', 'O campo telefone, Preencher somente números !');
+                  'Aviso', 'O campo e-mail, Preencher com email corretos !');
             }
           }
         },
