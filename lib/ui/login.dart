@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cadastro_app/ui/cadastrologin.dart';
 import 'package:cadastro_app/ui/home.dart';
@@ -57,9 +58,6 @@ class _LoginPageState extends State<LoginPage> {
     if (login.email == _emailController.text ||
         login.nome == _emailController.text &&
             login.senha == _senhaController.text) {
-      final recLogin = await Navigator.push(
-          context, MaterialPageRoute(builder: (context) => HomePage()));
-      await helper.getLogin(recLogin);
     } else {
       _showDialog('Aviso', 'Login inválido');
     }
@@ -68,6 +66,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.lightBlueAccent,
       appBar: AppBar(
         title: Text("Login"),
         backgroundColor: Colors.blue,
@@ -79,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
               child: ButtonTheme(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: RaisedButton(
-                    color: Colors.blue,
+                    color: Colors.blueAccent,
                     textColor: Colors.white,
                     onPressed: () {
                       //desativa o clique do botão.
@@ -108,55 +107,88 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  prefix: Icon(Icons.email),
-                  labelText: "Digite o E-mail ou nome",
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
-                ),
-                controller: _emailController,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return "Preencher este campo  !";
-                  }
-                },
-              ),
-              TextFormField(
-                obscureText: passwordVisible,
-                decoration: InputDecoration(
-                  prefix: Icon(Icons.vpn_key),
-                  labelText: "Digite a Senha",
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      passwordVisible ? Icons.visibility_off : Icons.visibility,
+              Container(
+                padding: EdgeInsets.only(top: 10.0),
+                margin: EdgeInsets.only(left: 20.0, right: 20.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.emailAddress,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        passwordVisible = !passwordVisible;
-                      });
-                    },
+                    filled: true,
+                    fillColor: Colors.grey.withOpacity(0.35),
+                    hintText: " Digite o E-mail ou nome",
+                    hintStyle: TextStyle(color: Colors.white),
+                    prefixIcon: Container(
+                      child: Icon(
+                        Icons.perm_identity,
+                        color: Colors.white,
+                      ),
+                      color: Colors.yellow,
+                    ),
                   ),
+                  controller: _emailController,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return "Campo obrigatório !";
+                    }
+                  },
                 ),
-                controller: _senhaController,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return "Preencher este campo  !";
-                  }
-                },
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 10.0),
+                margin: EdgeInsets.only(left: 20.0, right: 20.0),
+                child: TextFormField(
+                  style: TextStyle(color: Colors.white),
+                  obscureText: passwordVisible,
+                  decoration: InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey.withOpacity(0.35),
+                    hintText: " Digite a Senha",
+                    hintStyle: TextStyle(color: Colors.white),
+                    prefixIcon: Container(
+                      child: Icon(
+                        Icons.vpn_key,
+                        color: Colors.white,
+                      ),
+                      color: Colors.yellow,
+                    ),
+                    suffixIcon: Container(
+                      child: IconButton(
+                        icon: Icon(
+                          passwordVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            passwordVisible = !passwordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  controller: _senhaController,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return "Campo obrigatório !";
+                    }
+                  },
+                ),
               ),
               Padding(
-                padding: EdgeInsets.all(10.0),
+                padding: EdgeInsets.only(top: 10.0, left: 70.0, right: 70.0),
                 child: RaisedButton(
-                  color: Colors.green,
+                  color: Colors.yellow,
                   child: Text(
-                    "Entrar",
-                    style: TextStyle(color: Colors.white),
+                    "Login",
+                    style: TextStyle(color: Colors.lightBlue),
                   ),
                   onPressed: () {
                     if (_formkey.currentState.validate()) {
@@ -166,12 +198,11 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(10.0),
-                child: RaisedButton(
-                  color: Colors.greenAccent,
+                padding: EdgeInsets.only(left: 140.0, right: 140.0),
+                child: FlatButton(
                   child: Text(
-                    "Cadastrar",
-                    style: TextStyle(color: Colors.white),
+                    "Register",
+                    style: TextStyle(color: Colors.yellow),
                   ),
                   onPressed: () {
                     Navigator.push(

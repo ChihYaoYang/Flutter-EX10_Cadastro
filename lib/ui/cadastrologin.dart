@@ -90,85 +90,143 @@ class _CadastroLoginState extends State<CadastroLogin> {
                   )))
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(10.0),
-        child: Form(
-          key: _formkey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextFormField(
-                decoration: InputDecoration(
-                  prefix: Icon(Icons.person),
-                  labelText: "Digite o Nome",
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
-                ),
-                controller: _nomeController,
-                validator: (value) {
-                  //Valida o campo se for vazio return text
-                  if (value.isEmpty) {
-                    return "Preencher este campo  !";
-                  } else {
-                    //else passa valor para editedLogin  => editedLogin.nome nome do campo
-                    setState(() {
-                      _editedLogin.nome = value;
-                    });
-                  }
-                },
-              ),
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  prefix: Icon(Icons.email),
-                  labelText: "Digite o E-mail",
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
-                ),
-                controller: _emailController,
-                validator: (value) {
-                  //Valida o campo se for vazio return text
-                  if (value.isEmpty) {
-                    return "Preencher este campo  !";
-                  } else {
-                    //else passa valor para editedLogin  => editedLogin.email nome do campo
-                    setState(() {
-                      _editedLogin.email = value;
-                    });
-                  }
-                },
-              ),
-              TextFormField(
-                obscureText: passwordVisible,
-                decoration: InputDecoration(
-                  prefix: Icon(Icons.vpn_key),
-                  labelText: "Digite a Senha",
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      passwordVisible ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        passwordVisible = !passwordVisible;
-                      });
-                    },
-                  ),
-                ),
-                controller: _senhaController,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return "Preencher este campo  !";
-                  }
-                },
-              ),
-            ],
+      body: Stack(
+        children: <Widget>[
+          Positioned(
+            top: 0.0,
+            child: Image.asset(
+              'images/backlogin.jpg',
+              fit: BoxFit.fill,
+            ),
           ),
-        ),
+          Center(
+            child: Form(
+              key: _formkey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.only(top: 200.0),
+                    margin: EdgeInsets.only(left: 20.0, right: 20.0),
+                    child: TextFormField(
+                      style: TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.withOpacity(0.35),
+                        hintText: " Digite o Nome",
+                        hintStyle: TextStyle(color: Colors.white),
+                        prefixIcon: Container(
+                          child: Icon(
+                            Icons.perm_identity,
+                            color: Colors.blueAccent,
+                          ),
+                          color: Colors.white,
+                        ),
+                      ),
+                      controller: _nomeController,
+                      validator: (value) {
+                        //Valida o campo se for vazio return text
+                        if (value.isEmpty) {
+                          return "Campo obrigatório !";
+                        } else {
+                          //else passa valor para editedLogin  => editedLogin.nome nome do campo
+                          setState(() {
+                            _editedLogin.nome = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(top: 10.0),
+                    margin: EdgeInsets.only(left: 20.0, right: 20.0),
+                    child: TextFormField(
+                      style: TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.withOpacity(0.35),
+                        hintText: " Digite o E-mail",
+                        hintStyle: TextStyle(color: Colors.white),
+                        prefixIcon: Container(
+                          child: Icon(
+                            Icons.email,
+                            color: Colors.blueAccent,
+                          ),
+                          color: Colors.white,
+                        ),
+                      ),
+                      controller: _emailController,
+                      validator: (value) {
+                        //Valida o campo se for vazio return text
+                        if (value.isEmpty) {
+                          return "Campo obrigatório !";
+                        } else {
+                          //else passa valor para editedLogin  => editedLogin.email nome do campo
+                          setState(() {
+                            _editedLogin.email = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(top: 10.0),
+                    margin: EdgeInsets.only(left: 20.0, right: 20.0),
+                    child: TextFormField(
+                      style: TextStyle(color: Colors.white),
+                      obscureText: passwordVisible,
+                      decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.withOpacity(0.35),
+                        hintText: " Digite a Senha",
+                        hintStyle: TextStyle(color: Colors.white),
+                        prefixIcon: Container(
+                          child: Icon(
+                            Icons.vpn_key,
+                            color: Colors.blueAccent,
+                          ),
+                          color: Colors.white,
+                        ),
+                        suffixIcon: Container(
+                          child: IconButton(
+                            icon: Icon(
+                              passwordVisible
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                passwordVisible = !passwordVisible;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      controller: _senhaController,
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return "Campo obrigatório !";
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         //Botão flutuante
@@ -187,8 +245,11 @@ class _CadastroLoginState extends State<CadastroLogin> {
             }
           }
         },
-        child: Icon(Icons.save),
-        backgroundColor: Colors.cyan,
+        child: Icon(
+          Icons.save,
+          color: Colors.blueAccent,
+        ),
+        backgroundColor: Colors.white,
       ),
     );
   }
