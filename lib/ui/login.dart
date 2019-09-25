@@ -55,12 +55,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _login({Login login}) async {
-    if (login.email == _emailController.text ||
-        login.nome == _emailController.text &&
-            login.senha == _senhaController.text) {
-    } else {
-      _showDialog('Aviso', 'Login inválido');
-    }
+//    if (login.email == _emailController.text ||
+//        login.nome == _emailController.text &&
+//            login.senha == _senhaController.text) {
+//    } else {
+//      _showDialog('Aviso', 'Login inválido');
+//    }
   }
 
   @override
@@ -219,7 +219,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  //Alert Dialog
+//Alert Dialog
   void _showDialog(String title, String message) {
     showDialog(
       context: context,
