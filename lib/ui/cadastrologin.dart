@@ -218,6 +218,10 @@ class _CadastroLoginState extends State<CadastroLogin> {
                       validator: (value) {
                         if (value.isEmpty) {
                           return "Campo obrigatório !";
+                        } else {
+                          setState(() {
+                            _editedLogin.senha = value;
+                          });
                         }
                       },
                     ),

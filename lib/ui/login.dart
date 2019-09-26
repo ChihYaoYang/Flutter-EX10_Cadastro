@@ -11,8 +11,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   GlobalKey<FormState> _formkey = GlobalKey<FormState>();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _senhaController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _senhaController = TextEditingController();
 
   //Declara booleano
   bool passwordVisible;
@@ -23,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   //初始化狀態時 passwordVisible = true 隱藏字體
   @override
   void initState() {
+    super.initState();
     //Opacidade botão resert
     _emailController.addListener(() {
       btnReset();
@@ -54,13 +55,28 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void _login({Login login}) async {
-//    if (login.email == _emailController.text ||
-//        login.nome == _emailController.text &&
-//            login.senha == _senhaController.text) {
-//    } else {
-//      _showDialog('Aviso', 'Login inválido');
-//    }
+//login
+  void _login() async {
+    if (await helper.getLocado(_emailController.text, _senhaController.text) != null) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => HomePage()));
+    } else {
+      _showDialog('Aviso', 'Email ou Senha Inválido');
+    }
+  }
+
+//cadastro
+  void _register({Login login}) async {
+    final recLogin = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CadastroLogin(
+                  login: login,
+                )));
+    if (login != null) {
+      await helper.saveLogin(recLogin);
+      await helper.saveSession(recLogin);
+    }
   }
 
   @override
@@ -205,10 +221,7 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(color: Colors.yellow),
                   ),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => CadastroLogin()),
-                    );
+                    _register();
                   },
                 ),
               ),
