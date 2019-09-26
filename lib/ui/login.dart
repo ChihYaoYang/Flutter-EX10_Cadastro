@@ -57,7 +57,8 @@ class _LoginPageState extends State<LoginPage> {
 
 //login
   void _login() async {
-    if (await helper.getLocado(_emailController.text, _senhaController.text) != null) {
+    if (await helper.getLogins(_emailController.text, _senhaController.text) !=
+        null) {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => HomePage()));
     } else {

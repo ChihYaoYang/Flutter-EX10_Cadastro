@@ -51,20 +51,6 @@ class LoginHelper {
     return login;
   }
 
-  //Logar
-  Future<bool> getLocado(String email, String senha) async {
-    Database dbPerson = await db;
-    List<Map> maps = await dbPerson.query(loginTable,
-        columns: [emailColumn, senhaColumn],
-        where: "$emailColumn = ? and $senhaColumn = ?",
-        whereArgs: [email, senha]);
-    if (maps.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   //valida session
   Future<bool> session(int id) async {
     Database dbPerson = await db;
@@ -82,6 +68,20 @@ class LoginHelper {
     user.idvalidate = await dbPerson.insert(sessionTable, user.toMap());
     return user;
   }
+
+  Future<Login> getLogins(String email, String senha) async {
+    Database dbPerson = await db;
+    List<Map> maps = await dbPerson.query(loginTable,
+        columns: [emailColumn, senhaColumn],
+        where: "$emailColumn = ? and $senhaColumn = ?",
+        whereArgs: [email, senha]);
+    if (maps.length > 0) {
+      return Login.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
 
   Future<Login> getLogin(int id) async {
     Database dbPerson = await db;
