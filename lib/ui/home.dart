@@ -1,8 +1,10 @@
 import 'package:cadastro_app/ui/People.dart';
 import 'package:cadastro_app/ui/cadastropage.dart';
+import 'package:cadastro_app/ui/login.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cadastro_app/helper/person_helper.dart';
+import 'package:cadastro_app/helper/login_helper.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -22,16 +24,47 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
       ),
-      body: Center(
-        //Criar ListView
-        child: ListView.builder(
-          // Criar Lista
-            padding: EdgeInsets.all(10.0),
-            //Count quanto item tem no DB
-            itemCount: persons.length,
-            itemBuilder: (context, index) {
-              return _itemList(context, index); // return item do DB
-            }),
+      body: WillPopScope(
+          //Criar ListView
+          child: ListView.builder(
+              // Criar Lista
+              padding: EdgeInsets.all(10.0),
+              //Count quanto item tem no DB
+              itemCount: persons.length,
+              itemBuilder: (context, index) {
+                return _itemList(context, index); // return item do DB
+              }),
+          onWillPop: () {
+            return Future.value(false);
+          }),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              accountEmail: Text("Contact"),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: AssetImage('images/user.png'),
+              ),
+            ),
+            ListTile(
+              title: Text('Sair'),
+              leading: Icon(
+                Icons.exit_to_app,
+              ),
+              onTap: () async {
+                LoginHelper helper = LoginHelper();
+                helper.deleteSession();
+                Navigator.pop(context);
+                await Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => LoginPage()));
+              },
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -67,8 +100,8 @@ class _HomePageState extends State<HomePage> {
         context,
         MaterialPageRoute(
             builder: (context) => CadastroPage(
-              person: person,
-            )));
+                  person: person,
+                )));
     //Valida person
     if (recPerson != null) {
       //Se for diferente que NULL => UPDATE

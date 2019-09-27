@@ -1,10 +1,14 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:cadastro_app/ui/cadastrologin.dart';
 import 'package:cadastro_app/ui/home.dart';
 import 'package:cadastro_app/helper/login_helper.dart';
+import 'package:validators/validators.dart';
 
 class LoginPage extends StatefulWidget {
+  //constructor
+  Login login;
+
+  LoginPage({this.login});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -14,16 +18,25 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
 
-  //Declara booleano
   bool passwordVisible;
   bool condition = false;
 
   LoginHelper helper = LoginHelper();
+  Login _editedLogin;
+  Session _editedSession;
 
   //初始化狀態時 passwordVisible = true 隱藏字體
   @override
   void initState() {
     super.initState();
+    if (widget.login == null) {
+      _editedLogin = Login();
+      _editedSession = Session();
+    } else {
+      _editedLogin = Login.fromMap(widget.login.toMap());
+      _emailController.text = _editedLogin.email;
+      _senhaController.text = _editedLogin.senha;
+    }
     //Opacidade botão resert
     _emailController.addListener(() {
       btnReset();
@@ -32,6 +45,7 @@ class _LoginPageState extends State<LoginPage> {
       btnReset();
     });
     passwordVisible = true;
+    _editedSession = Session();
   }
 
 //Opacidade botão resert
@@ -55,38 +69,34 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-//login
+//Entrar(Login)
   void _login() async {
-    if (await helper.getLogins(_emailController.text, _senhaController.text) !=
-        null) {
-      Navigator.push(
+    if (await helper.getLogin(_editedLogin.email, _editedLogin.senha) != null) {
+      helper.saveSession(_editedSession);
+      Navigator.pop(context);
+      await Navigator.push(
           context, MaterialPageRoute(builder: (context) => HomePage()));
     } else {
-      _showDialog('Aviso', 'Email ou Senha Inválido');
+      _showDialog('Aviso', 'Email ou Senha incorretos !');
     }
   }
 
 //cadastro
-  void _register({Login login}) async {
-    final recLogin = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => CadastroLogin(
-                  login: login,
-                )));
-    if (login != null) {
-      await helper.saveLogin(recLogin);
-      await helper.saveSession(recLogin);
-    }
+  void _register() async {
+    helper.saveLogin(_editedLogin);
+    setState(() {
+      _emailController.text = '';
+      _senhaController.text = '';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlueAccent,
       appBar: AppBar(
         title: Text("Login"),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.cyan,
+        automaticallyImplyLeading: false,
         centerTitle: true,
         actions: <Widget>[
           Opacity(
@@ -95,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
               child: ButtonTheme(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: RaisedButton(
-                    color: Colors.blueAccent,
+                    color: Colors.cyan,
                     textColor: Colors.white,
                     onPressed: () {
                       //desativa o clique do botão.
@@ -105,8 +115,11 @@ class _LoginPageState extends State<LoginPage> {
                   )))
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(10.0),
+      backgroundColor: Colors.blue,
+      body: WillPopScope(
+        onWillPop: () {
+          return Future.value(false);
+        },
         child: Form(
           key: _formkey,
           child: Column(
@@ -136,11 +149,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     filled: true,
                     fillColor: Colors.grey.withOpacity(0.35),
-                    hintText: " Digite o E-mail ou nome",
+                    hintText: " Digite o E-mail",
                     hintStyle: TextStyle(color: Colors.white),
                     prefixIcon: Container(
                       child: Icon(
-                        Icons.perm_identity,
+                        Icons.email,
                         color: Colors.white,
                       ),
                       color: Colors.yellow,
@@ -150,6 +163,11 @@ class _LoginPageState extends State<LoginPage> {
                   validator: (value) {
                     if (value.isEmpty) {
                       return "Campo obrigatório !";
+                    } else {
+                      //else passa valor para editedLogin  => editedLogin.email nome do campo
+                      setState(() {
+                        _editedLogin.email = value;
+                      });
                     }
                   },
                 ),
@@ -195,6 +213,10 @@ class _LoginPageState extends State<LoginPage> {
                   validator: (value) {
                     if (value.isEmpty) {
                       return "Campo obrigatório !";
+                    } else {
+                      setState(() {
+                        _editedLogin.senha = value;
+                      });
                     }
                   },
                 ),
@@ -209,7 +231,11 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   onPressed: () {
                     if (_formkey.currentState.validate()) {
-                      _login();
+                      if (isEmail(_emailController.text)) {
+                        _login();
+                      } else {
+                        _showDialog('Aviso', 'Preencher com E-mail Válido !');
+                      }
                     }
                   },
                 ),
@@ -222,7 +248,13 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(color: Colors.yellow),
                   ),
                   onPressed: () {
-                    _register();
+                    if (_formkey.currentState.validate()) {
+                      if (isEmail(_emailController.text)) {
+                        _register();
+                      } else {
+                        _showDialog('Aviso', 'Preencher com E-mail Válido !');
+                      }
+                    }
                   },
                 ),
               ),

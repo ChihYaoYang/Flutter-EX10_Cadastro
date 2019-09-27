@@ -3,15 +3,12 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 final String loginTable = "loginTableTable";
-//Session table
-final String sessionTable = "sessionTable";
-final String idvalidateColumn = "idvalidate";
-final String iduserColumn = "iduser";
-
 final String idColumn = "id";
-final String nomeColumn = "nome";
 final String emailColumn = "email";
 final String senhaColumn = "senha";
+//Session table
+final String sessionTable = "sessionTable";
+final String idsessionColumn = "id";
 
 class LoginHelper {
   //cria um construtor privado
@@ -36,44 +33,27 @@ class LoginHelper {
 
   Future<Database> initDb() async {
     final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, "person.db");
+    final path = join(databasesPath, "usuario.db");
     return await openDatabase(path, version: 1,
         onCreate: (Database db, int newerVersion) async {
       await db.execute(
-          "CREATE TABLE $loginTable($idColumn INTEGER PRIMARY KEY, $nomeColumn TEXT, $emailColumn TEXT, $senhaColumn TEXT)"
-          "CREATE TABLE $sessionTable($idvalidateColumn INTEGER PRIMARY KEY, $iduserColumn INTEGER)");
+          "CREATE TABLE $loginTable($idColumn INTEGER PRIMARY KEY AUTOINCREMENT,$emailColumn TEXT, $senhaColumn TEXT)");
+      await db.execute(
+          "CREATE TABLE $sessionTable($idsessionColumn INTEGER PRIMARY KEY AUTOINCREMENT)");
     });
   }
 
   Future<Login> saveLogin(Login login) async {
-    Database dbPerson = await db;
-    login.id = await dbPerson.insert(loginTable, login.toMap());
+    Database dbLogin = await db;
+    login.id = await dbLogin.insert(loginTable, login.toMap());
     return login;
   }
 
-  //valida session
-  Future<bool> session(int id) async {
-    Database dbPerson = await db;
-    List<Map> maps =
-        await dbPerson.query(sessionTable, columns: [iduserColumn]);
-    if (maps.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  Future<User> saveSession(User user) async {
-    Database dbPerson = await db;
-    user.idvalidate = await dbPerson.insert(sessionTable, user.toMap());
-    return user;
-  }
-
-  Future<Login> getLogins(String email, String senha) async {
-    Database dbPerson = await db;
-    List<Map> maps = await dbPerson.query(loginTable,
-        columns: [emailColumn, senhaColumn],
-        where: "$emailColumn = ? and $senhaColumn = ?",
+  Future<Login> getLogin(String email, String senha) async {
+    Database dbLogin = await db;
+    List<Map> maps = await dbLogin.query(loginTable,
+        columns: [idColumn, emailColumn, senhaColumn],
+        where: "$emailColumn = ? AND $senhaColumn = ?",
         whereArgs: [email, senha]);
     if (maps.length > 0) {
       return Login.fromMap(maps.first);
@@ -82,40 +62,49 @@ class LoginHelper {
     }
   }
 
-
-  Future<Login> getLogin(int id) async {
-    Database dbPerson = await db;
-    List<Map> maps = await dbPerson.query(loginTable,
-        columns: [idColumn, nomeColumn, emailColumn, senhaColumn],
-        where: "$idColumn = ?",
-        whereArgs: [id]);
-    if (maps.length > 0) {
-      return Login.fromMap(maps.first);
-    } else {
-      return null;
-    }
-  }
-
   Future<int> deleteLogin(int id) async {
-    Database dbPerson = await db;
-    return await dbPerson
+    Database dbLogin = await db;
+    return await dbLogin
         .delete(loginTable, where: "$idColumn = ?", whereArgs: [id]);
   }
 
   Future<int> updateLogin(Login login) async {
-    Database dbPerson = await db;
-    return await dbPerson.update(loginTable, login.toMap(),
+    Database dbLogin = await db;
+    return await dbLogin.update(loginTable, login.toMap(),
         where: "$idColumn = ?", whereArgs: [login.id]);
   }
 
   Future<List> getAllLogins() async {
-    Database dbPerson = await db;
-    List listMap = await dbPerson.rawQuery("SELECT * FROM $loginTable");
+    Database dbLogin = await db;
+    List listMap = await dbLogin.rawQuery("SELECT * FROM $loginTable");
     List<Login> listPerson = List();
     for (Map m in listMap) {
       listPerson.add(Login.fromMap(m));
     }
     return listPerson;
+  }
+
+  //valida session
+  Future<bool> getSesseion() async {
+    Database dbSesseion = await db;
+    List<Map> maps = await dbSesseion.rawQuery("SELECT * FROM $sessionTable");
+    print(maps.toString());
+    if (maps.toString() != '[]') {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<Session> saveSession(Session session) async {
+    Database dbSesseion = await db;
+    session.id = await dbSesseion.insert(sessionTable, session.toMap());
+    return session;
+  }
+
+  Future<int> deleteSession() async {
+    Database dbSesseion = await db;
+    return await dbSesseion.delete(sessionTable);
   }
 
   Future close() async {
@@ -127,7 +116,6 @@ class LoginHelper {
 class Login {
   //cria uma nova classe Contact com os campos desejados;
   int id;
-  String nome;
   String email;
   String senha;
 
@@ -137,8 +125,7 @@ class Login {
 
   //converte os dados de um mapa para dados do objeto atual
   Login.fromMap(Map map) {
-    id = map[idvalidateColumn];
-    nome = map[nomeColumn];
+    id = map[idColumn];
     email = map[emailColumn];
     senha = map[senhaColumn];
   }
@@ -146,7 +133,6 @@ class Login {
   //converte os dados do objeto atual para um mapa
   Map toMap() {
     Map<String, dynamic> map = {
-      nomeColumn: nome,
       emailColumn: email,
       senhaColumn: senha,
     };
@@ -158,31 +144,22 @@ class Login {
 
   @override
   String toString() {
-    return "Login(id: $id, nome: $nome, email: $email, senha: $senha)";
+    return "Login(id: $id,email: $email, senha: $senha)";
   }
 }
 
-class User {
-  //cria uma nova classe Contact com os campos desejados;
-  int idvalidate;
-  int iduser;
+class Session {
+  int id;
 
-  //construtor sem parâmetros
-  //inicializa a própria classe sem parâmetros;
-  User();
+  Session();
 
-  //converte os dados de um mapa para dados do objeto atual
-  User.fromMap(Map map) {
-    idvalidate = map[idvalidateColumn];
-    iduser = map[iduserColumn];
+  Session.fromMap(Map map) {
+    id = map[idsessionColumn];
   }
 
   //converte os dados do objeto atual para um mapa
   Map toMap() {
-    Map<String, dynamic> map = {iduserColumn: iduser};
-    if (idvalidate != null) {
-      map[idvalidateColumn] = idvalidate;
-    }
+    Map<String, dynamic> map = {idColumn: id};
     return map;
   }
 }

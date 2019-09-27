@@ -6,7 +6,7 @@ import 'package:cadastro_app/helper/login_helper.dart';
 void main() async {
   LoginHelper helper = LoginHelper();
   runApp(MaterialApp(
-    home: (await helper.session == true) ? HomePage() : LoginPage(),
+    home: (await helper.getSesseion() == true) ? HomePage() : LoginPage(),
     debugShowCheckedModeBanner: false,
   ));
 }
