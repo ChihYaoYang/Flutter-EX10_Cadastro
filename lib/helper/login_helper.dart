@@ -14,10 +14,8 @@ class LoginHelper {
   //cria um construtor privado
   static final LoginHelper _instance = LoginHelper.internal();
 
-  //retorna uma instância da classe já executada, sem criar uma nova necessariamente. Ex: quando você vai criar um novo carro, não necessariamente você precisa montar uma fábrica totalmente nova.
   factory LoginHelper() => _instance;
 
-  //inicializa uma instancia interna da própria classe
   LoginHelper.internal();
 
   Database _db;
@@ -96,12 +94,14 @@ class LoginHelper {
     }
   }
 
+//salvar session
   Future<Session> saveSession(Session session) async {
     Database dbSesseion = await db;
     session.id = await dbSesseion.insert(sessionTable, session.toMap());
     return session;
   }
 
+//deletar session
   Future<int> deleteSession() async {
     Database dbSesseion = await db;
     return await dbSesseion.delete(sessionTable);
@@ -114,13 +114,10 @@ class LoginHelper {
 }
 
 class Login {
-  //cria uma nova classe Contact com os campos desejados;
   int id;
   String email;
   String senha;
 
-  //construtor sem parâmetros
-  //inicializa a própria classe sem parâmetros;
   Login();
 
   //converte os dados de um mapa para dados do objeto atual

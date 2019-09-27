@@ -89,8 +89,12 @@ class _CadastroPageState extends State<CadastroPage> {
                   )))
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(10.0),
+      body: GestureDetector(
+        //Clicking outside and close keyboard
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
         child: Form(
           key: _formkey,
           child: Column(

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cadastro_app/ui/home.dart';
 import 'package:cadastro_app/helper/login_helper.dart';
+import 'package:flutter/services.dart';
 import 'package:validators/validators.dart';
 
 class LoginPage extends StatefulWidget {
-  //constructor
+  //Constructor
   Login login;
 
   LoginPage({this.login});
@@ -14,6 +15,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  //Declara variaveis
   GlobalKey<FormState> _formkey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
@@ -25,10 +27,16 @@ class _LoginPageState extends State<LoginPage> {
   Login _editedLogin;
   Session _editedSession;
 
-  //初始化狀態時 passwordVisible = true 隱藏字體
+  //初始化狀態時
   @override
   void initState() {
     super.initState();
+    //Como queríamos remover as sobreposições apenas na splash screen,
+    // é necessário fazer uma chamada ao método setEnabledSystemUIOverlays
+    // passando como parâmetro o valor SystemUiOverlay.values no initState da
+    // classe HomePage (tela seguinte a splash) para que a tela volte ao posicionamento normal.
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    //se login for nulo é um novo cadastro, caso contrário é uma edição.
     if (widget.login == null) {
       _editedLogin = Login();
       _editedSession = Session();
@@ -44,8 +52,8 @@ class _LoginPageState extends State<LoginPage> {
     _senhaController.addListener(() {
       btnReset();
     });
+    //Declara variavel bool para usa obscuretext
     passwordVisible = true;
-    _editedSession = Session();
   }
 
 //Opacidade botão resert
@@ -71,12 +79,17 @@ class _LoginPageState extends State<LoginPage> {
 
 //Entrar(Login)
   void _login() async {
+    //valida e aguarda o valor se for diferente que nulo
     if (await helper.getLogin(_editedLogin.email, _editedLogin.senha) != null) {
+      //case sim, Salvar dados(session) e entra na tela HomePage()
       helper.saveSession(_editedSession);
-      Navigator.pop(context);
-      await Navigator.push(
-          context, MaterialPageRoute(builder: (context) => HomePage()));
+      Navigator.pop(context); //Navigator.pop fecha página
+      await Navigator.pushReplacement(
+          //pushReplacement sem possibilitar o retorno à anterior.
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()));
     } else {
+      //Exibir mensagem
       _showDialog('Aviso', 'Email ou Senha incorretos !');
     }
   }
@@ -96,8 +109,9 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: Text("Login"),
         backgroundColor: Colors.cyan,
-        automaticallyImplyLeading: false,
         centerTitle: true,
+        //Remove back button
+        automaticallyImplyLeading: false,
         actions: <Widget>[
           Opacity(
               //define a opacidade conforme o preenchimento dos campos.
@@ -116,9 +130,11 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
       backgroundColor: Colors.blue,
-      body: WillPopScope(
-        onWillPop: () {
-          return Future.value(false);
+      body: GestureDetector(
+        //permite executar uma operação quando o elemento for clicado.
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          FocusScope.of(context).requestFocus(new FocusNode());
         },
         child: Form(
           key: _formkey,
@@ -148,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                       borderSide: BorderSide(color: Colors.transparent),
                     ),
                     filled: true,
-                    fillColor: Colors.grey.withOpacity(0.35),
+                    fillColor: Colors.yellow.withOpacity(0.45),
                     hintText: " Digite o E-mail",
                     hintStyle: TextStyle(color: Colors.white),
                     prefixIcon: Container(
@@ -160,11 +176,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   controller: _emailController,
+                  //Validar valor for preenchido, e passa valor para editedLogin  => editedLogin.email nome do campo
                   validator: (value) {
                     if (value.isEmpty) {
                       return "Campo obrigatório !";
                     } else {
-                      //else passa valor para editedLogin  => editedLogin.email nome do campo
                       setState(() {
                         _editedLogin.email = value;
                       });
@@ -177,13 +193,14 @@ class _LoginPageState extends State<LoginPage> {
                 margin: EdgeInsets.only(left: 20.0, right: 20.0),
                 child: TextFormField(
                   style: TextStyle(color: Colors.white),
+                  //obscureText ocultar caracter, Se for true ocultar false exibir
                   obscureText: passwordVisible,
                   decoration: InputDecoration(
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.transparent),
                     ),
                     filled: true,
-                    fillColor: Colors.grey.withOpacity(0.35),
+                    fillColor: Colors.yellow.withOpacity(0.45),
                     hintText: " Digite a Senha",
                     hintStyle: TextStyle(color: Colors.white),
                     prefixIcon: Container(
@@ -196,9 +213,7 @@ class _LoginPageState extends State<LoginPage> {
                     suffixIcon: Container(
                       child: IconButton(
                         icon: Icon(
-                          passwordVisible
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                          passwordVisible ? Icons.visibility_off : Icons.visibility,
                           color: Colors.white,
                         ),
                         onPressed: () {

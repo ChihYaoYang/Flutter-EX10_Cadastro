@@ -1,12 +1,10 @@
+import 'package:cadastro_app/screen/splashscreen.dart';
 import 'package:flutter/material.dart';
-import 'package:cadastro_app/ui/login.dart';
-import 'package:cadastro_app/ui/home.dart';
-import 'package:cadastro_app/helper/login_helper.dart';
 
 void main() async {
-  LoginHelper helper = LoginHelper();
   runApp(MaterialApp(
-    home: (await helper.getSesseion() == true) ? HomePage() : LoginPage(),
+    //Chama tela de Splash Screen(加載頁面)
+    home: Splash(),
     debugShowCheckedModeBanner: false,
   ));
 }

@@ -2,6 +2,7 @@ import 'package:cadastro_app/ui/People.dart';
 import 'package:cadastro_app/ui/cadastropage.dart';
 import 'package:cadastro_app/ui/login.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cadastro_app/helper/person_helper.dart';
 import 'package:cadastro_app/helper/login_helper.dart';
@@ -16,6 +17,19 @@ class _HomePageState extends State<HomePage> {
   PersonHelper helper = PersonHelper();
   List<Person> persons = List();
 
+  //初始化狀態時
+  @override
+  void initState() {
+    super.initState();
+    //Como queríamos remover as sobreposições apenas na splash screen,
+    // é necessário fazer uma chamada ao método setEnabledSystemUIOverlays
+    // passando como parâmetro o valor SystemUiOverlay.values no initState da
+    // classe HomePage (tela seguinte a splash) para que a tela volte ao posicionamento normal.
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    //Fazer getAll do Item
+    _getAllPersons();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,20 +38,16 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
       ),
-      body: WillPopScope(
-          //Criar ListView
-          child: ListView.builder(
-              // Criar Lista
-              padding: EdgeInsets.all(10.0),
-              //Count quanto item tem no DB
-              itemCount: persons.length,
-              itemBuilder: (context, index) {
-                return _itemList(context, index); // return item do DB
-              }),
-          onWillPop: () {
-            return Future.value(false);
-          }),
+      body: Center(
+        child: ListView.builder(
+            padding: EdgeInsets.all(10.0),
+            itemCount: persons.length,
+            itemBuilder: (context, index) {
+              return _itemList(context, index);
+            }),
+      ),
       drawer: Drawer(
+        //Menu
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -59,7 +69,7 @@ class _HomePageState extends State<HomePage> {
                 LoginHelper helper = LoginHelper();
                 helper.deleteSession();
                 Navigator.pop(context);
-                await Navigator.push(context,
+                await Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => LoginPage()));
               },
             ),
@@ -76,14 +86,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //初始化狀態時
-  @override
-  void initState() {
-    //Fazer getAll do Item
-    super.initState();
-    _getAllPersons();
-  }
-
   //Fazer getAll do Item
   void _getAllPersons() {
     helper.getAllPersons().then((list) {
@@ -93,24 +95,24 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  //Ir para Cadastro (INSERT)
-  //Passa Class person para cadastropage.dart
   void _showCadastroPage({Person person}) async {
+    //entra na tela CadastroPage e aguarda ele voltar dela.
     final recPerson = await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => CadastroPage(
                   person: person,
                 )));
-    //Valida person
+    //ao voltar verifica se ela voltou vazia.
     if (recPerson != null) {
-      //Se for diferente que NULL => UPDATE
+      //se o parâmetro contact não estiver vazio, significa que é uma atualização.
       if (person != null) {
         await helper.updatePerson(recPerson);
       } else {
-        //Se for null person vazio => INSERT começa nova cadastro
+        //caso contrário é uma nova inserção.
         await helper.savePerson(recPerson);
       }
+      //atualiza a lista de contatos;
       _getAllPersons();
     }
   }
@@ -131,6 +133,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showOptions(BuildContext context, int index) {
+    //abre um menu de contexto no rodapé da página
     showModalBottomSheet(
       context: context,
       builder: (context) {
