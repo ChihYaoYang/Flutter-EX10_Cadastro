@@ -31,7 +31,8 @@ class _SplashState extends State<Splash> {
       if (await helper.getSesseion() == true) {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => HomePage()));
-      } else { //Caso contrário(else) redireciona para página LoginPage()
+      } else {
+        //Caso contrário(else) redireciona para página LoginPage()
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => LoginPage()));
       }

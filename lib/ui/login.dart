@@ -130,12 +130,9 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
       backgroundColor: Colors.blue,
-      body: GestureDetector(
-        //permite executar uma operação quando o elemento for clicado.
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          FocusScope.of(context).requestFocus(new FocusNode());
-        },
+      //permite a tela ser rolada automaticamente para cima com objetivo de não esconder
+      // campos embaixo do teclado virtual
+      body: SingleChildScrollView(
         child: Form(
           key: _formkey,
           child: Column(
@@ -213,7 +210,9 @@ class _LoginPageState extends State<LoginPage> {
                     suffixIcon: Container(
                       child: IconButton(
                         icon: Icon(
-                          passwordVisible ? Icons.visibility_off : Icons.visibility,
+                          passwordVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           color: Colors.white,
                         ),
                         onPressed: () {

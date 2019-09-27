@@ -89,12 +89,9 @@ class _CadastroPageState extends State<CadastroPage> {
                   )))
         ],
       ),
-      body: GestureDetector(
-        //Clicking outside and close keyboard
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          FocusScope.of(context).requestFocus(new FocusNode());
-        },
+      //permite a tela ser rolada automaticamente para cima com objetivo de não esconder
+      // campos embaixo do teclado virtual
+      body: SingleChildScrollView(
         child: Form(
           key: _formkey,
           child: Column(
