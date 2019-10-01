@@ -1,14 +1,7 @@
 import 'dart:async';
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-
-final String loginTable = "loginTableTable";
-final String idColumn = "id";
-final String emailColumn = "email";
-final String senhaColumn = "senha";
-//Session table
-final String sessionTable = "sessionTable";
-final String idsessionColumn = "id";
+import 'package:cadastro_app/helper/databases.dart';
+import 'package:cadastro_app/utils/Strings.dart';
 
 class LoginHelper {
   //cria um construtor privado
@@ -18,41 +11,32 @@ class LoginHelper {
 
   LoginHelper.internal();
 
-  Database _db;
+  Databases databases = new Databases();
 
-  Future<Database> get db async {
-    if (_db != null) {
-      return _db;
+  Future<bool> saveLogin(String nome, String email, String senha) async {
+    Database dbLogin = await databases.db;
+    Login login = new Login();
+    login.nome = nome;
+    login.email = email;
+    login.senha = senha;
+    if (await dbLogin.insert(loginTable, login.toMap()) > 0) {
+      return true;
     } else {
-      _db = await initDb();
-      return _db;
+      return false;
     }
   }
 
-  Future<Database> initDb() async {
-    final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, "usuario.db");
-    return await openDatabase(path, version: 1,
-        onCreate: (Database db, int newerVersion) async {
-      await db.execute(
-          "CREATE TABLE $loginTable($idColumn INTEGER PRIMARY KEY AUTOINCREMENT,$emailColumn TEXT, $senhaColumn TEXT)");
-      await db.execute(
-          "CREATE TABLE $sessionTable($idsessionColumn INTEGER PRIMARY KEY AUTOINCREMENT)");
-    });
-  }
-
-  Future<Login> saveLogin(Login login) async {
-    Database dbLogin = await db;
-    login.id = await dbLogin.insert(loginTable, login.toMap());
-    return login;
-  }
-
-  Future<Login> getLogin(String email, String senha) async {
-    Database dbLogin = await db;
+  Future<Login> getLogin(String email, String nome, String senha) async {
+    Database dbLogin = await databases.db;
     List<Map> maps = await dbLogin.query(loginTable,
-        columns: [idColumn, emailColumn, senhaColumn],
-        where: "$emailColumn = ? AND $senhaColumn = ?",
-        whereArgs: [email, senha]);
+        columns: [
+          idLoginColumn,
+          emailLoginColumn,
+          nomeLoginColumn,
+          senhaLoginColumn
+        ],
+        where: "$emailLoginColumn = ? OR $nomeLoginColumn = ? AND $senhaLoginColumn = ?",
+        whereArgs: [email, nome, senha]);
     if (maps.length > 0) {
       return Login.fromMap(maps.first);
     } else {
@@ -61,102 +45,112 @@ class LoginHelper {
   }
 
   Future<int> deleteLogin(int id) async {
-    Database dbLogin = await db;
+    Database dbLogin = await databases.db;
     return await dbLogin
-        .delete(loginTable, where: "$idColumn = ?", whereArgs: [id]);
+        .delete(loginTable, where: "$idLoginColumn = ?", whereArgs: [id]);
   }
 
   Future<int> updateLogin(Login login) async {
-    Database dbLogin = await db;
+    Database dbLogin = await databases.db;
     return await dbLogin.update(loginTable, login.toMap(),
-        where: "$idColumn = ?", whereArgs: [login.id]);
+        where: "$idLoginColumn = ?", whereArgs: [login.id]);
   }
 
   Future<List> getAllLogins() async {
-    Database dbLogin = await db;
+    Database dbLogin = await databases.db;
     List listMap = await dbLogin.rawQuery("SELECT * FROM $loginTable");
-    List<Login> listPerson = List();
+    List<Login> listLogin = List();
     for (Map m in listMap) {
-      listPerson.add(Login.fromMap(m));
+      listLogin.add(Login.fromMap(m));
     }
-    return listPerson;
+    return listLogin;
   }
 
-  //valida session
-  Future<bool> getSesseion() async {
-    Database dbSesseion = await db;
-    List<Map> maps = await dbSesseion.rawQuery("SELECT * FROM $sessionTable");
-    print(maps.toString());
-    if (maps.toString() != '[]') {
+  //valida Usuário logado
+  Future<bool> saveLogado(int login_id) async {
+    Database dbLogado = await databases.db;
+    Logado logado = new Logado();
+    logado.id = 1;
+    logado.logado_login_id = login_id;
+    if (await dbLogado.insert(logadoTable, logado.toMap()) > 0) {
       return true;
     } else {
       return false;
     }
   }
 
-//salvar session
-  Future<Session> saveSession(Session session) async {
-    Database dbSesseion = await db;
-    session.id = await dbSesseion.insert(sessionTable, session.toMap());
-    return session;
+  Future<int> getLogado() async {
+    Database dbLogado = await databases.db;
+    List<Map> maps = await dbLogado.rawQuery("SELECT * FROM $logadoTable");
+    if (maps.length > 0) {
+      Logado usuariologado = Logado.fromMap(maps.first);
+      return usuariologado.logado_login_id;
+    } else {
+      return 0;
+    }
   }
 
-//deletar session
-  Future<int> deleteSession() async {
-    Database dbSesseion = await db;
-    return await dbSesseion.delete(sessionTable);
+  Future<int> deleteLogado() async {
+    Database dbLogin = await databases.db;
+    await dbLogin.delete(logadoTable);
+    return 1;
   }
 
   Future close() async {
-    Database dbPerson = await db;
-    dbPerson.close();
+    Database dbLogin = await databases.db;
+    dbLogin.close();
   }
 }
 
 class Login {
   int id;
+  String nome;
   String email;
   String senha;
 
   Login();
 
-  //converte os dados de um mapa para dados do objeto atual
   Login.fromMap(Map map) {
-    id = map[idColumn];
-    email = map[emailColumn];
-    senha = map[senhaColumn];
+    id = map[idLoginColumn];
+    email = map[emailLoginColumn];
+    nome = map[nomeLoginColumn];
+    senha = map[senhaLoginColumn];
   }
 
-  //converte os dados do objeto atual para um mapa
   Map toMap() {
     Map<String, dynamic> map = {
-      emailColumn: email,
-      senhaColumn: senha,
+      emailLoginColumn: email,
+      nomeLoginColumn: nome,
+      senhaLoginColumn: senha
     };
     if (id != null) {
-      map[idColumn] = id;
+      map[idLoginColumn] = id;
     }
     return map;
   }
 
   @override
   String toString() {
-    return "Login(id: $id,email: $email, senha: $senha)";
+    return "Login(id: $id, name: $nome, email: $email, senha: $senha)";
   }
 }
 
-class Session {
+class Logado {
   int id;
+  int logado_login_id;
 
-  Session();
+  Logado();
 
-  Session.fromMap(Map map) {
-    id = map[idsessionColumn];
+  Logado.fromMap(Map map) {
+    id = map[idLogadoColumn];
+    logado_login_id = map[login_idLogadoColumn];
   }
 
-  //converte os dados do objeto atual para um mapa
   Map toMap() {
-    Map<String, dynamic> map = {idColumn: id};
+    Map<String, dynamic> map = {
+      idLoginColumn: id,
+      login_idLogadoColumn: logado_login_id
+    };
     return map;
   }
 }

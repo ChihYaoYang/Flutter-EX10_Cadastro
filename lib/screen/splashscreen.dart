@@ -26,11 +26,12 @@ class _SplashState extends State<Splash> {
     // que deverá ser aberta. Para isso, usamos ao método delayed da classe Future passando como parâmetro
     // um Duration de 4 segundos.
     // Por fim, o método pushReplacement da classe Navigator é utilizado para executar a troca da tela sem possibilitar o retorno à anterior.
-    Future.delayed(Duration(seconds: 4)).then((_) async {
-      //Valida Session se o usuário estiver logado(true) redireciona para página HomePage()
-      if (await helper.getSesseion() == true) {
+    Future.delayed(Duration(seconds: 2)).then((_) async {
+      int logado = await helper.getLogado();
+      //Se o logado estiver > 0, usuário cadastrado else novo usuário(cadastro novo)
+      if (logado > 0) {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomePage()));
+            context, MaterialPageRoute(builder: (context) => HomePage(logado)));
       } else {
         //Caso contrário(else) redireciona para página LoginPage()
         Navigator.pushReplacement(

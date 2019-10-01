@@ -6,16 +6,26 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cadastro_app/helper/person_helper.dart';
 import 'package:cadastro_app/helper/login_helper.dart';
+import 'package:cadastro_app/utils/Dialogs.dart';
 
 class HomePage extends StatefulWidget {
+  //Constructor
+  int login_id;
+
+  HomePage(this.login_id);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
+enum OrderOptions { orderaz, orderza }
+
 class _HomePageState extends State<HomePage> {
   //Chama Helper /Cria ListView
+  Dialogs dialog = new Dialogs();
+  LoginHelper helperLog = LoginHelper();
   PersonHelper helper = PersonHelper();
-  List<Person> persons = List();
+  List<Person> person = List();
 
   //初始化狀態時
   @override
@@ -37,15 +47,31 @@ class _HomePageState extends State<HomePage> {
         title: Text("Contato"),
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
+        actions: <Widget>[
+          PopupMenuButton<OrderOptions>(
+              itemBuilder: (context) => <PopupMenuEntry<OrderOptions>>[
+                    const PopupMenuItem<OrderOptions>(
+                      child: Text('Ordenar de A-Z'),
+                      value: OrderOptions.orderaz,
+                    ),
+                    const PopupMenuItem<OrderOptions>(
+                      child: Text('Ordenar de Z-A'),
+                      value: OrderOptions.orderza,
+                    ),
+                  ],
+              onSelected: _orderList)
+        ],
       ),
-      body: Center(
-        child: ListView.builder(
-            padding: EdgeInsets.all(10.0),
-            itemCount: persons.length,
-            itemBuilder: (context, index) {
-              return _itemList(context, index);
-            }),
-      ),
+      body: WillPopScope(
+          child: ListView.builder(
+              padding: EdgeInsets.all(10.0),
+              itemCount: person.length,
+              itemBuilder: (context, index) {
+                return _itemList(context, index);
+              }),
+          onWillPop: () {
+            return null;
+          }),
       drawer: Drawer(
         //Menu
         child: ListView(
@@ -67,7 +93,7 @@ class _HomePageState extends State<HomePage> {
               ),
               onTap: () async {
                 LoginHelper helper = LoginHelper();
-                helper.deleteSession();
+                helper.deleteLogado();
                 Navigator.pop(context);
                 await Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => LoginPage()));
@@ -87,10 +113,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   //Fazer getAll do Item
-  void _getAllPersons() {
-    helper.getAllPersons().then((list) {
+  void _getAllPersons() async {
+    helper.getAllPersons(widget.login_id).then((list) {
       setState(() {
-        persons = list;
+        person = list;
       });
     });
   }
@@ -107,10 +133,10 @@ class _HomePageState extends State<HomePage> {
     if (recPerson != null) {
       //se o parâmetro contact não estiver vazio, significa que é uma atualização.
       if (person != null) {
-        await helper.updatePerson(recPerson);
+        await helper.updatePerson(recPerson, widget.login_id);
       } else {
         //caso contrário é uma nova inserção.
-        await helper.savePerson(recPerson);
+        await helper.savePerson(recPerson, widget.login_id);
       }
       //atualiza a lista de contatos;
       _getAllPersons();
@@ -121,146 +147,130 @@ class _HomePageState extends State<HomePage> {
   Widget _itemList(BuildContext context, int index) {
     return GestureDetector(
       child: Card(
-        child: ListTile(
-          title: Text(persons[index].nome),
-          subtitle: Text(persons[index].telefone),
-          onTap: () {
-            _showOptions(context, index);
-          },
-        ),
+        child: Padding(
+            padding: EdgeInsets.all(10.0),
+            child: ListTile(
+              title: Text('Nome: ' + person[index].nome),
+              subtitle: Text('Número: ' + person[index].telefone),
+              trailing: Text(person[index].id.toString()),
+            )),
       ),
+      onTap: () {
+        _showOptions(context, index);
+      },
     );
   }
 
+  void _orderList(OrderOptions result) async {
+    switch (result) {
+      case OrderOptions.orderaz:
+        person.sort((a, b) {
+          return a.nome.toLowerCase().compareTo(b.nome.toLowerCase());
+        });
+        break;
+      case OrderOptions.orderza:
+        person.sort((a, b) {
+          return b.nome.toLowerCase().compareTo(a.nome.toLowerCase());
+        });
+        break;
+    }
+    setState(() {});
+  }
+
   void _showOptions(BuildContext context, int index) {
-    //abre um menu de contexto no rodapé da página
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return BottomSheet(
-          onClosing: () {},
-          builder: (context) {
-            return Container(
-              padding: EdgeInsets.all(10.0),
+    List<Widget> botoes = [];
+    botoes.add(FlatButton(
+      child: Row(
+        children: <Widget>[
+          Icon(Icons.phone_in_talk, color: Colors.blueAccent),
+          Padding(
+              padding: EdgeInsets.only(left: 10),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: FlatButton(
-                        child: Row(
-                          children: <Widget>[
-                            Icon(Icons.person, color: Colors.cyan),
-                            Padding(
-                                padding: EdgeInsets.only(left: 10),
-                                child: Column(
-                                  children: <Widget>[
-                                    Text(
-                                      'Ver',
-                                      style: TextStyle(
-                                          color: Colors.cyan, fontSize: 20.0),
-                                    )
-                                  ],
-                                ))
-                          ],
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => People(
-                                    persons[index].id,
-                                    persons[index].nome,
-                                    persons[index].telefone)),
-                          );
-                        }),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: FlatButton(
-                      child: Row(
-                        children: <Widget>[
-                          Icon(Icons.phone_in_talk, color: Colors.cyan),
-                          Padding(
-                              padding: EdgeInsets.only(left: 10),
-                              child: Column(
-                                children: <Widget>[
-                                  Text(
-                                    'Discar',
-                                    style: TextStyle(
-                                        color: Colors.cyan, fontSize: 20.0),
-                                  ),
-                                ],
-                              ))
-                        ],
-                      ),
-                      onPressed: () {
-                        launch("tel:${persons[index].telefone}");
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: FlatButton(
-                      child: Row(
-                        children: <Widget>[
-                          Icon(Icons.edit, color: Colors.cyan),
-                          Padding(
-                              padding: EdgeInsets.only(left: 10),
-                              child: Column(
-                                children: <Widget>[
-                                  Text(
-                                    'Editar',
-                                    style: TextStyle(
-                                        color: Colors.cyan, fontSize: 20.0),
-                                  ),
-                                ],
-                              ))
-                        ],
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _showCadastroPage(person: persons[index]);
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: FlatButton(
-                      child: Row(
-                        children: <Widget>[
-                          Icon(Icons.delete, color: Colors.cyan),
-                          Padding(
-                              padding: EdgeInsets.only(left: 10),
-                              child: Column(
-                                children: <Widget>[
-                                  Text(
-                                    'Deletar',
-                                    style: TextStyle(
-                                        color: Colors.cyan, fontSize: 20.0),
-                                  ),
-                                ],
-                              ))
-                        ],
-                      ),
-                      onPressed: () {
-                        helper.deletePerson(persons[index].id);
-                        setState(() {
-                          persons.removeAt(index);
-                          Navigator.pop(context);
-                        });
-                      },
-                    ),
-                  ),
+                  Text(
+                    'Ligar',
+                    style: TextStyle(color: Colors.blueAccent, fontSize: 15.0),
+                  )
                 ],
-              ),
-            );
-          },
+              ))
+        ],
+      ),
+      onPressed: () {
+        launch("tel:${person[index].telefone}");
+        Navigator.pop(context);
+      },
+    ));
+    botoes.add(FlatButton(
+      child: Row(
+        children: <Widget>[
+          Icon(Icons.person, color: Colors.blueAccent),
+          Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    'Ver',
+                    style: TextStyle(color: Colors.blueAccent, fontSize: 15.0),
+                  )
+                ],
+              ))
+        ],
+      ),
+      onPressed: () {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => People(person[index].id, person[index].nome,
+                  person[index].telefone)),
         );
       },
-    );
+    ));
+    botoes.add(FlatButton(
+      child: Row(
+        children: <Widget>[
+          Icon(Icons.edit, color: Colors.blueAccent),
+          Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    'Modificar',
+                    style: TextStyle(color: Colors.blueAccent, fontSize: 15.0),
+                  )
+                ],
+              ))
+        ],
+      ),
+      onPressed: () {
+        Navigator.pop(context);
+        _showCadastroPage(person: person[index]);
+      },
+    ));
+    botoes.add(FlatButton(
+      child: Row(
+        children: <Widget>[
+          Icon(Icons.delete, color: Colors.blueAccent),
+          Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    'Deletar',
+                    style: TextStyle(color: Colors.blueAccent, fontSize: 15.0),
+                  )
+                ],
+              ))
+        ],
+      ),
+      onPressed: () {
+        helper.deletePerson(person[index].id);
+        setState(() {
+          person.removeAt(index);
+          Navigator.pop(context);
+        });
+      },
+    ));
+    dialog.showBottomOptions(context, botoes);
   }
 }
