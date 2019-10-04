@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
         centerTitle: true,
         actions: <Widget>[
           Opacity(
-              //define a opacidade conforme o preenchimento dos campos.
+            //define a opacidade conforme o preenchimento dos campos.
               opacity: this.condition ? 1.0 : 0.0,
               child: ButtonTheme(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -214,38 +214,41 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                   ),
-                  Padding(
-                    padding:
-                        EdgeInsets.only(top: 10.0, left: 70.0, right: 70.0),
-                    child: RaisedButton(
-                      color: Colors.yellow,
-                      child: Text(
-                        "Login",
-                        style: TextStyle(color: Colors.lightBlue),
-                      ),
-                      onPressed: () {
-                        if (_formkey.currentState.validate()) {
-                          _login();
-                        }
-                      },
+                  SizedBox(height: 30),
+                  RaisedButton(
+                    child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(Icons.https),
+                          Text("Login"),
+                        ]
                     ),
+                    color: Colors.yellow,
+                    textColor: Colors.white,
+                    onPressed: () {
+                      if (_formkey.currentState.validate()) {
+                        _login();
+                      }
+                    },
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 140.0, right: 140.0),
-                    child: FlatButton(
-                      child: Text(
-                        "Register",
-                        style: TextStyle(color: Colors.yellow),
+                  RaisedButton(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(Icons.edit),
+                          Text("Register")
+                        ],
                       ),
+                      color: Colors.white,
+                      textColor: Colors.blueAccent,
                       onPressed: () async {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => CadastroLogin()));
-                        _resetFields();
-                      },
-                    ),
-                  ),
+                      }),
                 ],
               ),
             ),

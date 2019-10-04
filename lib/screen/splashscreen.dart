@@ -26,7 +26,7 @@ class _SplashState extends State<Splash> {
     // que deverá ser aberta. Para isso, usamos ao método delayed da classe Future passando como parâmetro
     // um Duration de 4 segundos.
     // Por fim, o método pushReplacement da classe Navigator é utilizado para executar a troca da tela sem possibilitar o retorno à anterior.
-    Future.delayed(Duration(seconds: 2)).then((_) async {
+    Future.delayed(Duration(seconds: 1)).then((_) async {
       int logado = await helper.getLogado();
       //Se o logado estiver > 0, usuário cadastrado else novo usuário(cadastro novo)
       if (logado > 0) {
