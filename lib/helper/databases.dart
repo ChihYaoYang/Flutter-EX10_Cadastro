@@ -27,7 +27,7 @@ class Databases{
           "CREATE TABLE $logadoTable ($idLogadoColumn INTEGER PRIMARY KEY AUTOINCREMENT,$login_idLogadoColumn INT);"
       );
       await db.execute(
-          "CREATE TABLE $personTable($idPersonColumn INTEGER PRIMARY KEY, $nomePersonColumn TEXT, $telefonePersonColumn TEXT, $login_idPersonColumn INTEGER)"
+          "CREATE TABLE $personTable($idPersonColumn INTEGER PRIMARY KEY, $nomePersonColumn TEXT, $telefonePersonColumn TEXT NOT NULL UNIQUE, $login_idPersonColumn INTEGER)"
       );
     });
   }

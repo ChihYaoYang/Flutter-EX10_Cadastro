@@ -78,7 +78,6 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             UserAccountsDrawerHeader(
-              accountEmail: Text("Contact"),
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
