@@ -152,7 +152,7 @@ class _HomePageState extends State<HomePage> {
             child: ListTile(
               title: Text('Nome: ' + person[index].nome),
               subtitle: Text('Número: ' + person[index].telefone),
-              trailing: Text(person[index].id.toString()),
+              trailing: Text((index+1).toString()),
             )),
       ),
       onTap: () {
